@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_response_header_test
+          uri: ${test.uri}
+          predicates:
+            - Path=/headers
+          filters:
+            - AddResponseHeader=X-Response-Example, ABC
