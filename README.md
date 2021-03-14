@@ -107,5 +107,85 @@
             filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin  # Access-Control-Allow-Credentials 와 Access-Control-Allow-Origin의 중복 제거
     ```
-4. FallbackHeadersGatewayFilter
+4. MapRequestHeaderGatewayFilter
+    - `fromHeader`에 지정한 헤더와 동일한 값을 가지는 `toHeader`를 생성한다.
+    ```yaml
+    spring:
+      cloud:
+        gateway:
+          routes:
+            - id: map_request_header_test
+              uri: ${test.uri}
+              predicates:
+                - Path=/headers
+              filters:
+                - MapRequestHeader=X-Request-Blue, X-Request-Red # X-Request-Blue와 같은 값을 가지는 X-Request-Red 헤더를 만든다.
+    ```
+   - Map~으로 시작하여 헤더의 이름이 변경 되겠지 생각 했지만 그냥 같은 값을 가지는 헤더를 하나 더 만드는 것
+5. PrefixPathGatewayFilter
+   - 요청에 대해 prefix를 지정한다.
+   ```yaml
+       spring:
+         cloud:
+           gateway:
+             routes:
+               - id: prefix_path_test
+                 uri: ${test.uri}
+                 filters:
+                   - PrefixPath=/mypath  # 모든 요청에 대해서 /mypath를 붙인다 (/hello -> /mypath/hello)
+   ```
+6. RedirectToGatewayFilter
+    - 3XX Redirect 응답을 하는 필터
+    ```yaml
+    spring:
+      cloud:
+        gateway:
+          routes:
+          - id: redirect_test
+            uri: ${test.uri}
+            filters:
+            - RedirectTo=302, https://spring.io  # 302 Location:https://spring.io Redirection이 된다.
+    ```
+7. RemoveRequestHeaderGatewayFilter (or RemoveResponseHeaderGatewayFilter)
+    - 제거할 Header를 지정한다.
+    ```yaml
+    spring:
+      cloud:
+        gateway:
+          routes:
+            - id: remove_request_header_test
+              uri: ${test.uri}
+              filters:
+                - RemoveRequestHeader=X-Request-Foo
+    ```
+8. RemoveRequestParameterGatewayFilter
+    - 제거할 Parameter를 지정한다.
+    ```yaml
+    spring:
+      cloud:
+        gateway:
+          routes:
+          - id: remove_request_parameter_test
+            uri: https://example.org
+            filters:
+            - RemoveRequestParameter=red
+    ```
+9. RewritePathGatewayFilter
+    - 정규식을 이용하여 uri path를 rewrite한다.
+    ```yaml
+    spring:
+      cloud:
+        gateway:
+          routes:
+          - id: rewritepath_test
+            uri: https://example.org
+            predicates:
+            - Path=/red/**
+            filters:
+            - RewritePath=/red(?<segment>/?.*), $\{segment}  # /red/blue -> /bule
+    ```
+  
+   
+Hystrix 관련 필터들..은 나중에...   
+   
    
