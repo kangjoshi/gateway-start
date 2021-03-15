@@ -184,7 +184,50 @@
             filters:
             - RewritePath=/red(?<segment>/?.*), $\{segment}  # /red/blue -> /bule
     ```
-  
+10. ModifyRequestBodyGatewayFilter
+    - downstream에 전송 전 request body를 수정한다.
+    - Java DSL로만 설정이 가능한 필터
+    - RequestBody가 없다면 `RewriteFilter`는 null을 반환하므로 리턴시 Mono.empty()를 리턴 해야한다.
+    ```java
+    @Bean
+    public RouteLocator routeLocator(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("rewrite_request_body",
+                    r -> r.path("/headers")
+                    .filters(f -> f.modifyRequestBody(Hello.class, Hello.class, MediaType.APPLICATION_JSON_VALUE,
+                            (exchange, hello) -> Mono.just(new Hello(hello.getName().toUpperCase(), "world2"))))
+                    .uri(uri)
+                )
+                .build();
+    }
+    ```
+
+11. ModifyResponseBodyGatewayFilter
+    - client에 전송 전 response body를 수정한다.
+    - Java DSL로만 설정이 가능한 필터
+    - ResponseBody가 없다면 `RewriteFilter`는 null을 반환하므로 리턴시 Mono.empty()를 리턴 해야한다.
+    ```java
+    @Bean
+    public RouteLocator routeLocator(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("rewrite_reponse_body",
+                    r -> r.path("/headers")
+                    .filters(f -> f.modifyResponseBody(Map.class, Map.class,
+                            (exchange, s) -> {
+                                s.put("X-Response-Example", "ABC");
+                                return Mono.just(s);
+                            }))
+                    .uri(uri)
+                )
+                .build();
+    }
+```
+
+
+
+
+
+
    
 Hystrix 관련 필터들..은 나중에...   
    
